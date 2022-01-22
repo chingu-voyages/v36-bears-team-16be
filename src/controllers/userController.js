@@ -53,6 +53,22 @@ const createUser = (request, response) => {
   );
 };
 
+const updateUser = (request, response) => {
+  const id = parseInt(request.params.id);
+  const { username, password, email, is_owner, address } = request.body;
+
+  pool.query(
+    "UPDATE users SET username = $1, password = $2, email = $3, is_owner = $4,address =$5 WHERE id = $6",
+    [username, password, email, is_owner, address, id],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      response.status(200).send(`Modified user with ID: ${id}`);
+    }
+  );
+};
+
 const deleteUserById = (request, response) => {
   const id = parseInt(request.params.id);
 
@@ -68,6 +84,6 @@ module.exports = {
   getUsers,
   getUserById,
   createUser,
-  // updateUser,
+  updateUser,
   deleteUserById,
 };
