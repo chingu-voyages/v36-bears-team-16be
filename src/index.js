@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 require("dotenv").config();
 const { NotFoundError } = require("./expressError");
-const router = express.Router();
+const userRouter = require("./routes/userRoutes");
 
 const app = express();
 
@@ -20,6 +20,8 @@ app.use(cors());
 app.get("/", (req, res) => {
   res.send("Hello Wolrd");
 });
+
+app.use("/api/users", userRouter);
 
 // If no endpoint matches
 app.use(function (req, res, next) {
