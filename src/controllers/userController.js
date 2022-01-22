@@ -9,7 +9,6 @@ const pool = new Pool({
 });
 
 const getUsers = (request, response) => {
-  console.log(process.env.DB_PORT);
   pool.query("SELECT * FROM users ORDER BY id", (error, results) => {
     if (error) {
       throw error;
@@ -45,5 +44,5 @@ module.exports = {
   getUserById,
   // createUser,
   // updateUser,
-  // deleteUserById
+  deleteUserById,
 };
