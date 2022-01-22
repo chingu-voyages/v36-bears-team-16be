@@ -28,6 +28,31 @@ const getUserById = (request, response) => {
   });
 };
 
+const createUser = (request, response) => {
+  const { username, password, email, is_owner, address } = request.body;
+
+  pool.query(
+    "INSERT INTO users (username, password,email,is_owner,address) VALUES ($1, $2,$3, $4, $5)",
+    [username, password, email, is_owner, address],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+    }
+  );
+  pool.query(
+    "SELECT * FROM users ORDER BY ID DESC LIMIT 1",
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      response
+        .status(201)
+        .json(`Inserted new user with ID: ${results.rows[0].id}`);
+    }
+  );
+};
+
 const deleteUserById = (request, response) => {
   const id = parseInt(request.params.id);
 
@@ -42,7 +67,7 @@ const deleteUserById = (request, response) => {
 module.exports = {
   getUsers,
   getUserById,
-  // createUser,
+  createUser,
   // updateUser,
   deleteUserById,
 };
