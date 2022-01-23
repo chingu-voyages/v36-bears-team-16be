@@ -22,6 +22,21 @@ const getOrdersByUserId = (req, res) => {
   );
 };
 
+const getOrdersByRestaurantId = (req, res) => {
+  const restaurantId = parseInt(req.params.restaurantId);
+  pool.query(
+    "SELECT * FROM orders WHERE restaurant_id = $1",
+    [restaurantId],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.status(200).json(results.rows);
+    }
+  );
+};
+
 module.exports = {
   getOrdersByUserId,
+  getOrdersByRestaurantId,
 };
