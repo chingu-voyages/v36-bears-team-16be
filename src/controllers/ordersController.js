@@ -36,7 +36,33 @@ const getOrdersByRestaurantId = (req, res) => {
   );
 };
 
+const createOrder = (req, res) => {
+  const { restaurant_id, user_id } = req.body;
+
+  pool.query(
+    "INSERT INTO orders (restaurant_id,user_id) VALUES ($1, $2)",
+    [restaurant_id, user_id],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+    }
+  );
+  pool.query(
+    "SELECT * FROM orders ORDER BY ID DESC LIMIT 1",
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res
+        .status(201)
+        .json(`Inserted new orders with ID: ${results.rows[0].id}`);
+    }
+  );
+};
+
 module.exports = {
   getOrdersByUserId,
   getOrdersByRestaurantId,
+  createOrder,
 };
