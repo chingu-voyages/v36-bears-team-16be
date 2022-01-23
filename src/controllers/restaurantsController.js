@@ -68,6 +68,43 @@ const createRestaurantByName = (req, res) => {
   );
 };
 
+const updateRestaurant = (req, res) => {
+  const id = parseInt(req.params.restaurantId);
+  const {
+    name,
+    phone,
+    restaurant_address,
+    hours,
+    delivery,
+    irl_payment_only,
+    pending_orders,
+    cancelled_orders,
+    completed_orders,
+  } = req.body;
+
+  pool.query(
+    "UPDATE restaurants SET name = $1, phone = $2, restaurant_address = $3, hours = $4, delivery = $5, irl_payment_only = $6, pending_orders = $7, cancelled_orders = $8, completed_orders = $9 WHERE id = $10",
+    [
+      name,
+      phone,
+      restaurant_address,
+      hours,
+      delivery,
+      irl_payment_only,
+      pending_orders,
+      cancelled_orders,
+      completed_orders,
+      id,
+    ],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.status(200).send(`Modified restaurant with ID: ${id}`);
+    }
+  );
+};
+
 const deleteRestaurantById = (req, res) => {
   const id = parseInt(req.params.restaurantId);
   pool.query(
@@ -87,4 +124,5 @@ module.exports = {
   getRestaurantByName,
   createRestaurantByName,
   deleteRestaurantById,
+  updateRestaurant,
 };
