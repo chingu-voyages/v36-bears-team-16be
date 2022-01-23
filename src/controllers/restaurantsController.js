@@ -22,6 +22,20 @@ const getRestaurantByOwnerId = (req, res) => {
   );
 };
 
+const getRestaurantByName = (req, res) => {
+  const name = req.query.name.toLowerCase();
+  pool.query(
+    `SELECT * FROM restaurants WHERE lower(name) LIKE '${name}%' LIMIT 3`,
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.status(200).json(results.rows);
+    }
+  );
+};
+
 module.exports = {
   getRestaurantByOwnerId,
+  getRestaurantByName,
 };
