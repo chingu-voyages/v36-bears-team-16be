@@ -35,7 +35,41 @@ const getRestaurantByName = (req, res) => {
   );
 };
 
+const createRestaurantByName = (req, res) => {
+  const {
+    name,
+    phone,
+    restaurant_address,
+    hours,
+    delivery,
+    owner,
+    irl_payment_only,
+  } = req.body;
+
+  pool.query(
+    "INSERT INTO restaurants (name,phone,restaurant_address,hours,delivery,owner,irl_payment_only) VALUES ($1, $2,$3, $4, $5, $6, $7)",
+    [name, phone, restaurant_address, hours, delivery, owner, irl_payment_only],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+    }
+  );
+  pool.query(
+    "SELECT * FROM restaurants ORDER BY ID DESC LIMIT 1",
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res
+        .status(201)
+        .json(`Inserted new restaurant with ID: ${results.rows[0].id}`);
+    }
+  );
+};
+
 module.exports = {
   getRestaurantByOwnerId,
   getRestaurantByName,
+  createRestaurantByName,
 };
