@@ -4,6 +4,8 @@ const cors = require("cors");
 require("dotenv").config();
 const { NotFoundError } = require("./expressError");
 const userRouter = require("./routes/userRoutes");
+const restaurantRouter = require("./routes/restaurantsRoutes");
+const ordersRouter = require("./routes/orderRoutes");
 
 const app = express();
 
@@ -22,6 +24,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/users", userRouter);
+app.use("/api/restaurants", restaurantRouter);
+app.use("/api/orders", ordersRouter);
 
 // If no endpoint matches
 app.use(function (req, res, next) {
