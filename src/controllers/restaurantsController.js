@@ -68,8 +68,23 @@ const createRestaurantByName = (req, res) => {
   );
 };
 
+const deleteRestaurantById = (req, res) => {
+  const id = parseInt(req.params.restaurantId);
+  pool.query(
+    "DELETE FROM restaurants WHERE id = $1",
+    [id],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.status(200).send(`Restaurant deleted with ID: ${id}`);
+    }
+  );
+};
+
 module.exports = {
   getRestaurantByOwnerId,
   getRestaurantByName,
   createRestaurantByName,
+  deleteRestaurantById,
 };

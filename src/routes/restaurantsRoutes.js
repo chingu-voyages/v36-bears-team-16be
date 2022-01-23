@@ -5,5 +5,6 @@ const controller = require("../controllers/restaurantsController");
 router.get("/owner/:ownerId", controller.getRestaurantByOwnerId);
 router.get("/", controller.getRestaurantByName);
 router.post("/", controller.createRestaurantByName);
+router.delete("/:restaurantId", controller.deleteRestaurantById);
 
 module.exports = router;
