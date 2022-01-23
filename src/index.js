@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 require("dotenv").config();
+const helmet = require("helmet");
 const { NotFoundError } = require("./expressError");
 const userRouter = require("./routes/userRoutes");
 const restaurantRouter = require("./routes/restaurantsRoutes");
@@ -18,7 +19,7 @@ app.use(
   })
 );
 app.use(cors());
-
+app.use(helmet());
 app.get("/", (req, res) => {
   res.send("Hello Wolrd");
 });
