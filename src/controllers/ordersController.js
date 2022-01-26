@@ -1,32 +1,64 @@
 require("dotenv").config();
 const Pool = require("pg").Pool;
+
 const pool = new Pool({
-  user: process.env.USER,
-  host: process.env.HOST,
-  database: process.env.DATABASE,
-  password: process.env.PASSWORD,
-  port: process.env.DB_PORT,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 const getOrdersByUserId = (req, res) => {
   const userId = parseInt(req.params.userId);
   pool.query(
-    "SELECT * FROM orders WHERE user_id = $1",
-    [userId],
+    `WITH order_details AS
+    (SELECT omi.order_id, SUM(menu_items.price * omi.quantity) AS total,
+           STRING_AGG(menu_items.name || '(' || omi.quantity || ')', ', ') AS order_contents
+      FROM menu_items
+           INNER JOIN orders_menu_items AS omi
+               ON omi.menu_item_id = menu_items.id
+    GROUP BY omi.order_id)
+  
+    SELECT orders.id AS order_id, users.username AS customer, restaurants.name AS restaurant_name, orders.status,
+           datetime_order_placed, order_details.order_contents AS contents, order_details.total AS total_price
+    FROM users
+         INNER JOIN orders
+             ON users.id = orders.user_id
+         INNER JOIN restaurants
+             ON orders.restaurant_id = restaurants.id
+         INNER JOIN order_details
+             ON order_details.order_id = orders.id
+    WHERE users.id = $1`, [userId],
     (error, results) => {
       if (error) {
-        throw error;
+        res.status(500).send(error.toString());
+      } else {
+        res.status(200).json(results.rows);
       }
-      res.status(200).json(results.rows);
-    }
-  );
+    });
 };
 
 const getOrdersByRestaurantId = (req, res) => {
   const restaurantId = parseInt(req.params.restaurantId);
   pool.query(
-    "SELECT * FROM orders WHERE restaurant_id = $1",
-    [restaurantId],
+    `WITH order_details AS
+    (SELECT omi.order_id, SUM(menu_items.price * omi.quantity) AS total,
+           STRING_AGG(menu_items.name || '(' || omi.quantity || ')', ', ') AS order_contents
+      FROM menu_items
+           INNER JOIN orders_menu_items AS omi
+               ON omi.menu_item_id = menu_items.id
+    GROUP BY omi.order_id)
+  
+    SELECT orders.id AS order_id, users.username AS customer, orders.status,
+           datetime_order_placed, order_details.order_contents AS contents, order_details.total AS total_price
+    FROM users
+         INNER JOIN orders
+             ON users.id = orders.user_id
+         INNER JOIN restaurants
+             ON orders.restaurant_id = restaurants.id
+         INNER JOIN order_details
+             ON order_details.order_id = orders.id
+    WHERE restaurants.id = $1`, [restaurantId],
     (error, results) => {
       if (error) {
         throw error;
