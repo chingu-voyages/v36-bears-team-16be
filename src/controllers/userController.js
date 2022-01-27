@@ -39,27 +39,18 @@ const createUser = (request, response) => {
     last_name,
     email,
     is_owner,
-    address_id,
     phone,
-    street,
-    city,
-    state,
-    country,
+    street_address,
     zip_code,
+    country_code,
   } = request.body;
 
   pool.query(
-    `WITH new_address_row AS (
-      INSERT INTO addresses(street, city, state, country, zip_code)
-      VALUES
-        ($1, $2, $3, $4, $5)
-      RETURNING *
-    )
-    INSERT INTO users (username, password, first_name, last_name, email, is_owner, address_id, phone)
-    VALUES
-      ($6, $7, $8, $9, $10, $11, (SELECT id FROM new_address_row), $12)
-    returning *`,
-    [street, city, state, country, zip_code, username, password, first_name, last_name, email, is_owner, phone],
+    `INSERT INTO users (username, password, first_name, last_name, email, is_owner, street_address, zip_code, country_code, phone)
+     VALUES
+       ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+     returning *`,
+    [username, password, first_name, last_name, email, is_owner, street_address, zip_code, country_code, phone],
     (error, results) => {
       if (error) {
         response.send(error.toString());
@@ -80,15 +71,17 @@ const updateUser = (request, response) => {
     last_name,
     email,
     is_owner,
-    address_id,
+    street_address,
+    zip_code,
+    country_code,
     phone,
   } = request.body;
 
   pool.query(
     `UPDATE users
      SET username = $1, password = $2, first_name = $3,
-     last_name = $4, email = $5, is_owner = $6, address_id = $7, phone = $8
-     WHERE id = $9`,
+     last_name = $4, email = $5, is_owner = $6, street_address = $7, zip_code = $8, country_code = $9, phone = $10
+     WHERE id = $11`,
     [
       username,
       password,
@@ -96,7 +89,9 @@ const updateUser = (request, response) => {
       last_name,
       email,
       is_owner,
-      address_id,
+      street_address,
+      zip_code,
+      country_code,
       phone,
       id,
     ],

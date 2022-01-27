@@ -18,9 +18,9 @@ const getOrdersByUserId = (req, res) => {
            INNER JOIN orders_menu_items AS omi
                ON omi.menu_item_id = menu_items.id
     GROUP BY omi.order_id)
-  
+
     SELECT orders.id AS order_id, users.username AS customer, restaurants.name AS restaurant_name, orders.status,
-           datetime_order_placed, order_details.order_contents AS contents, order_details.total AS total_price
+           created, order_details.order_contents AS contents, order_details.total AS total_price
     FROM users
          INNER JOIN orders
              ON users.id = orders.user_id
@@ -32,9 +32,8 @@ const getOrdersByUserId = (req, res) => {
     (error, results) => {
       if (error) {
         res.status(500).send(error.toString());
-      } else {
-        res.status(200).json(results.rows);
       }
+      res.status(200).json(results.rows);
     });
 };
 
@@ -48,9 +47,9 @@ const getOrdersByRestaurantId = (req, res) => {
            INNER JOIN orders_menu_items AS omi
                ON omi.menu_item_id = menu_items.id
     GROUP BY omi.order_id)
-  
+
     SELECT orders.id AS order_id, users.username AS customer, orders.status,
-           datetime_order_placed, order_details.order_contents AS contents, order_details.total AS total_price
+           created, order_details.order_contents AS contents, order_details.total AS total_price
     FROM users
          INNER JOIN orders
              ON users.id = orders.user_id
@@ -61,36 +60,43 @@ const getOrdersByRestaurantId = (req, res) => {
     WHERE restaurants.id = $1`, [restaurantId],
     (error, results) => {
       if (error) {
-        throw error;
+        res.status(500).send(error.toString());
       }
       res.status(200).json(results.rows);
     }
   );
 };
 
-const createOrder = (req, res) => {
-  const { restaurant_id, user_id } = req.body;
+const createOrder = async (req, res) => {
+  const { user_id, restaurant_id, items, status, paid } = req.body;
 
-  pool.query(
-    "INSERT INTO orders (restaurant_id,user_id) VALUES ($1, $2)",
-    [restaurant_id, user_id],
-    (error, results) => {
-      if (error) {
-        throw error;
-      }
-    }
-  );
-  pool.query(
-    "SELECT * FROM orders ORDER BY ID DESC LIMIT 1",
-    (error, results) => {
-      if (error) {
-        throw error;
-      }
-      res
-        .status(201)
-        .json(`Inserted new orders with ID: ${results.rows[0].id}`);
-    }
-  );
+  let values = [user_id, restaurant_id, status, paid];
+  console.log('values set');
+
+  // Build part of query that inserts items
+  let valueCount = values.length;
+  const subparts = [];
+  let itemsQuerySection =
+        "INSERT INTO orders_menu_items(order_id, menu_item_id, quantity) VALUES ";
+  items.forEach(item => {
+    subparts.push(`((SELECT id FROM order_result), $${++valueCount}, $${++valueCount})`);
+    const itemValues = [item.menu_item_id, item.quantity];
+    values = values.concat(itemValues);
+  });
+  itemsQuerySection = itemsQuerySection + subparts.join(", ") + " RETURNING order_id";
+
+  try {
+    const queryResults = await pool.query(
+      `WITH order_result AS
+         (INSERT INTO orders (user_id, restaurant_id, status, paid)
+          VALUES
+            ($1, $2, $3, $4)
+          RETURNING *) ` + itemsQuerySection, values);
+
+    res.status(201).send(`Order ${queryResults.rows[0].order_id} added`);
+  } catch (error) {
+    res.status(500).json(itemsQuerySection + ' ' + error.toString());
+  }
 };
 
 const updateOrder = (req, res) => {
