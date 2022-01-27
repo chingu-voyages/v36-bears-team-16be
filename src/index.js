@@ -10,7 +10,7 @@ const ordersRouter = require("./routes/orderRoutes");
 
 const app = express();
 
-const port = process.env.port || 5000;
+const port = process.env.PORT || 5000;
 
 app.use(bodyParser.json());
 app.use(
@@ -56,6 +56,6 @@ app.use(function (err, req, res, next) {
   }
 });
 
-app.listen(5000, () => {
+app.listen(port, () => {
   console.log(`Backend is running on port ${port}`);
 });
