@@ -71,7 +71,6 @@ const createOrder = async (req, res) => {
   const { user_id, restaurant_id, items, status, paid } = req.body;
 
   let values = [user_id, restaurant_id, status, paid];
-  console.log('values set');
 
   // Build part of query that inserts items
   let valueCount = values.length;
@@ -95,7 +94,7 @@ const createOrder = async (req, res) => {
 
     res.status(201).send(`Order ${queryResults.rows[0].order_id} added`);
   } catch (error) {
-    res.status(500).json(itemsQuerySection + ' ' + error.toString());
+    res.status(500).json(error.toString());
   }
 };
 
