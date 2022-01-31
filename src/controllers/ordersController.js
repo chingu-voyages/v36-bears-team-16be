@@ -127,9 +127,28 @@ const updateOrderStatus = (req, res) => {
   );
 };
 
+const updateOrderItems = (req, res) => {
+  const orderId = parseInt(req.params.orderId);
+  const items = req.body.items;
+  items.forEach((item) => {
+    pool.query(
+      `INSERT INTO orders_menu_items (order_id, menu_item_id, quantity) VALUES($1,$2,$3) ON CONFLICT ON CONSTRAINT orders_menu_items_pkey DO UPDATE SET quantity = $3`,
+      [orderId, item.menu_item_id, item.quantity],
+      (error, results) => {
+        if (error) {
+          throw error;
+        }
+      }
+    );
+  });
+
+  res.status(200).send(`Modified order with ID: ${orderId}`);
+};
+
 module.exports = {
   getOrdersByUserId,
   getOrdersByRestaurantId,
   createOrder,
   updateOrderStatus,
+  updateOrderItems,
 };
