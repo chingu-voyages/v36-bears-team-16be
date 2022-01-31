@@ -2,12 +2,16 @@ require("dotenv").config();
 
 const Pool = require("pg").Pool;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+const pool = new Pool(
+  process.env.NODE_ENV === "dev"
+    ? { connectionString: process.env.TEST_DATABASE_URL }
+    : {
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }
+);
 
 const getUsers = (request, response) => {
   pool.query("SELECT * FROM users ORDER BY id", (error, results) => {
@@ -50,7 +54,18 @@ const createUser = (request, response) => {
      VALUES
        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      returning *`,
-    [username, password, first_name, last_name, email, is_owner, street_address, zip_code, country_code, phone],
+    [
+      username,
+      password,
+      first_name,
+      last_name,
+      email,
+      is_owner,
+      street_address,
+      zip_code,
+      country_code,
+      phone,
+    ],
     (error, results) => {
       if (error) {
         response.send(error.toString());
@@ -59,7 +74,8 @@ const createUser = (request, response) => {
           .status(201)
           .json(`Inserted new user with ID: ${results.rows[0].id}`);
       }
-    });
+    }
+  );
 };
 
 const updateUser = (request, response) => {
@@ -101,7 +117,8 @@ const updateUser = (request, response) => {
       } else {
         response.status(200).send(`Modified user with ID: ${id}`);
       }
-    });
+    }
+  );
 };
 
 const deleteUserById = (request, response) => {

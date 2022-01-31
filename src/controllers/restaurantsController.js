@@ -1,12 +1,15 @@
 require("dotenv").config();
 const Pool = require("pg").Pool;
-const pool = new Pool({
-  user: process.env.USER,
-  host: process.env.HOST,
-  database: process.env.DATABASE,
-  password: process.env.PASSWORD,
-  port: process.env.DB_PORT,
-});
+const pool = new Pool(
+  process.env.NODE_ENV === "dev"
+    ? { connectionString: process.env.TEST_DATABASE_URL }
+    : {
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }
+);
 
 const getRestaurantByOwnerId = (req, res) => {
   const ownerId = parseInt(req.params.ownerId);
