@@ -111,14 +111,13 @@ const createOrder = async (req, res) => {
   }
 };
 
-const updateOrder = (req, res) => {
+const updateOrderStatus = (req, res) => {
   const orderId = parseInt(req.params.orderId);
-  const { paid, order_recieved, in_process, done, cancelled, user_recieved } =
-    req.body;
+  const { paid, status } = req.body;
 
   pool.query(
-    "UPDATE orders SET paid = $1, order_recieved = $2, in_process = $3, done = $4, cancelled = $5, user_recieved = $6 WHERE id = $7",
-    [paid, order_recieved, in_process, done, cancelled, user_recieved, orderId],
+    "UPDATE orders SET paid = $1, status =$2 WHERE id = $3",
+    [paid, status, orderId],
     (error, results) => {
       if (error) {
         throw error;
@@ -132,5 +131,5 @@ module.exports = {
   getOrdersByUserId,
   getOrdersByRestaurantId,
   createOrder,
-  updateOrder,
+  updateOrderStatus,
 };

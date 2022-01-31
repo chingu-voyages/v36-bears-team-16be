@@ -5,6 +5,6 @@ const controller = require("../controllers/ordersController");
 router.get("/users/:userId", controller.getOrdersByUserId);
 router.get("/restaurants/:restaurantId", controller.getOrdersByRestaurantId);
 router.post("/", controller.createOrder);
-router.patch("/:orderId", controller.updateOrder);
+router.patch("/:orderId", controller.updateOrderStatus);
 
 module.exports = router;
